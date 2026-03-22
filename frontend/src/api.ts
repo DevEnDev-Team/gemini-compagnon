@@ -4,6 +4,7 @@ export interface Project {
   id: string;
   name: string;
   path: string;
+  icon?: string;
 }
 
 export interface Message {
@@ -20,62 +21,99 @@ export interface ProjectState {
   pendingNotification: boolean;
 }
 
-const API_BASE_URL = 'http://' + window.location.hostname + ':3001';
+const API_BASE_URL = ''; // Relative paths (works with Vite proxy or Express serving)
 const API_KEY = 'default-secret';
 
 export let socket: Socket;
 
 export function initSocket() {
   if (!socket) {
-    socket = io(API_BASE_URL);
+    socket = io();
   }
   return socket;
 }
 
+async function handleResponse(response: Response) {
+  const contentType = response.headers.get('content-type');
+  if (contentType && contentType.includes('application/json')) {
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.error || `Erreur ${response.status}`);
+    }
+    return data;
+  } else {
+    // Non-JSON response (likely HTML error page)
+    const text = await response.text();
+    if (!response.ok) {
+      if (text.includes('<!DOCTYPE html>')) {
+        throw new Error(`Erreur serveur (HTML) : ${response.status} ${response.statusText}. La route API n'est peut-être pas trouvée.`);
+      }
+      throw new Error(`Erreur serveur : ${response.status} ${response.statusText}`);
+    }
+    return text;
+  }
+}
+
 export async function getProjects(): Promise<Project[]> {
   const response = await fetch(`${API_BASE_URL}/projects`);
-  return response.json();
+  return handleResponse(response);
 }
 
 export async function getProjectHistory(projectId: string): Promise<Message[]> {
   const response = await fetch(`${API_BASE_URL}/projects/${projectId}/history`);
-  return response.json();
+  return handleResponse(response);
 }
 
 export async function getProjectState(projectId: string): Promise<ProjectState> {
   const response = await fetch(`${API_BASE_URL}/projects/${projectId}/state`);
-  return response.json();
+  return handleResponse(response);
 }
 
 export async function clearProjectNotification(projectId: string) {
   const response = await fetch(`${API_BASE_URL}/projects/${projectId}/clear-notification`, {
     method: 'POST'
   });
-  return response.json();
+  return handleResponse(response);
 }
 
 export async function listDirectories(path?: string): Promise<{ currentPath: string; parentPath: string; directories: string[] }> {
   const url = path ? `${API_BASE_URL}/fs/list?path=${encodeURIComponent(path)}` : `${API_BASE_URL}/fs/list`;
   const response = await fetch(url);
-  const data = await response.json();
-  if (!response.ok) {
-    throw new Error(data.error || 'Erreur lors de la récupération des dossiers');
-  }
-  return data;
+  return handleResponse(response);
 }
 
-export async function addProject(name: string, path: string): Promise<Project> {
+export async function addProject(name: string, path: string, icon?: string): Promise<Project> {
   const response = await fetch(`${API_BASE_URL}/projects`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name, path }),
+    body: JSON.stringify({ name, path, icon }),
   });
-  
-  const data = await response.json();
-  if (!response.ok) {
-    throw new Error(data.error || 'Erreur lors de l\'ajout du projet');
-  }
-  return data;
+  return handleResponse(response);
+}
+
+export async function deleteProject(id: string): Promise<void> {
+  const response = await fetch(`${API_BASE_URL}/projects/${id}`, {
+    method: 'DELETE'
+  });
+  return handleResponse(response);
+}
+
+export async function updateProject(id: string, updates: Partial<Project>): Promise<Project> {
+  const response = await fetch(`${API_BASE_URL}/projects/${id}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(updates),
+  });
+  return handleResponse(response);
+}
+
+export async function reorderProjects(ids: string[]): Promise<Project[]> {
+  const response = await fetch(`${API_BASE_URL}/projects/reorder`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ ids }),
+  });
+  return handleResponse(response);
 }
 
 export function joinProject(projectId: string) {

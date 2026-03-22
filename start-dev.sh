@@ -18,7 +18,7 @@ echo "📍 Working directory: $(pwd)"
 
 # Start Backend
 echo "📡 Starting Backend (http://localhost:3001)..."
-(cd backend && npm run start) &
+(cd backend && npx tsx watch server.ts) &
 
 # Start Frontend
 echo "💻 Starting Frontend (http://localhost:5173)..."

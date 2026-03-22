@@ -1,11 +1,14 @@
 import { useState, useRef, useEffect } from 'react';
-import { Send, Loader2, Menu, Check, X as Close, Trash2, Bot } from 'lucide-react';
+import { Send, Loader2, Menu, Check, X as Close, Trash2, Bot, Folder, Code, Globe, Database, Cpu, Layers, Settings, Terminal as TerminalIcon, Cloud } from 'lucide-react';
 import { 
   initSocket, 
   getProjects, 
   getProjectHistory, 
   getProjectState,
   addProject, 
+  deleteProject,
+  updateProject,
+  reorderProjects,
   sendChatMessage, 
   sendTerminalInput,
   joinProject,
@@ -18,9 +21,24 @@ import { Sidebar } from './components/Sidebar';
 import { Terminal } from './components/Terminal';
 import './App.css';
 
+const AVAILABLE_ICONS = {
+  Bot: Bot,
+  Folder: Folder,
+  Code: Code,
+  Globe: Globe,
+  Database: Database,
+  Cpu: Cpu,
+  Layers: Layers,
+  Settings: Settings,
+  Terminal: TerminalIcon,
+  Cloud: Cloud,
+};
+
 function App() {
   const [projects, setProjects] = useState<Project[]>([]);
-  const [activeProjectId, setActiveProjectId] = useState<string>('');
+  const [activeProjectId, setActiveProjectId] = useState<string>(() => {
+    return localStorage.getItem('lastProjectId') || '';
+  });
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -40,6 +58,14 @@ function App() {
   });
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 150)}px`;
+    }
+  }, [input]);
 
   useEffect(() => {
     if ("Notification" in window && Notification.permission === "default") {
@@ -79,6 +105,50 @@ function App() {
     if (!clearedAt) return true;
     return new Date(msg.timestamp) > new Date(clearedAt);
   });
+
+  const scrollToBottom = () => {
+    setTimeout(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, 100);
+  };
+
+  const loadInitialData = async () => {
+    const projs = await getProjects();
+    setProjects(projs);
+
+    // Check all projects for pending notifications
+    for (const p of projs) {
+      const state = await getProjectState(p.id);
+      if (state.pendingNotification) {
+        showNotification(p.name, "Une tâche s'est terminée pendant ton absence.");
+        await clearProjectNotification(p.id);
+      }
+    }
+
+    if (projs.length > 0) {
+      const lastId = localStorage.getItem('lastProjectId');
+      const idToSelect = (lastId && projs.find(p => p.id === lastId)) ? lastId : projs[0].id;
+      handleProjectSelect(idToSelect);
+    }
+  };
+
+  const loadProjectData = async (projectId: string) => {
+    const history = await getProjectHistory(projectId);
+    setMessages(history);
+    const state = await getProjectState(projectId);
+    setTerminalOutput(state.terminalLog);
+    setIsLoading(state.isRunning);
+    setPendingPrompt(state.pendingPrompt);
+
+    if (state.pendingNotification) {
+      const projectName = projects.find(p => p.id === projectId)?.name || 'Gemini Compagnon';
+      showNotification(projectName, "Une tâche s'est terminée pendant ton absence.");
+      await clearProjectNotification(projectId);
+    }
+
+    joinProject(projectId);
+    scrollToBottom();
+  };
 
   useEffect(() => {
     loadInitialData();
@@ -139,48 +209,6 @@ function App() {
     };
   }, [activeProjectId, projects]);
 
-  const loadInitialData = async () => {
-    const projs = await getProjects();
-    setProjects(projs);
-
-    // Check all projects for pending notifications
-    for (const p of projs) {
-      const state = await getProjectState(p.id);
-      if (state.pendingNotification) {
-        showNotification(p.name, "Une tâche s'est terminée pendant ton absence.");
-        await clearProjectNotification(p.id);
-      }
-    }
-
-    if (projs.length > 0 && !activeProjectId) {
-      handleProjectSelect(projs[0].id);
-    }
-  };
-
-  const loadProjectData = async (projectId: string) => {
-    const history = await getProjectHistory(projectId);
-    setMessages(history);
-    const state = await getProjectState(projectId);
-    setTerminalOutput(state.terminalLog);
-    setIsLoading(state.isRunning);
-    setPendingPrompt(state.pendingPrompt);
-
-    if (state.pendingNotification) {
-      const projectName = projects.find(p => p.id === projectId)?.name || 'Gemini Compagnon';
-      showNotification(projectName, "Une tâche s'est terminée pendant ton absence.");
-      await clearProjectNotification(projectId);
-    }
-
-    joinProject(projectId);
-    scrollToBottom();
-  };
-
-  const scrollToBottom = () => {
-    setTimeout(() => {
-      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, 100);
-  };
-
   const handleSend = () => {
     if (!input.trim() || isLoading) return;
     setIsLoading(true);
@@ -199,15 +227,54 @@ function App() {
 
   const handleProjectSelect = (id: string) => {
     setActiveProjectId(id);
+    localStorage.setItem('lastProjectId', id);
     loadProjectData(id);
   };
 
-  const handleAddProject = async (name: string, path: string) => {
+  const handleAddProject = async (name: string, path: string, icon?: string) => {
     try {
-      const newProj = await addProject(name, path);
+      const newProj = await addProject(name, path, icon);
       const projs = await getProjects();
       setProjects(projs);
       handleProjectSelect(newProj.id);
+    } catch (error: any) {
+      alert(error.message);
+    }
+  };
+
+  const handleDeleteProject = async (id: string) => {
+    try {
+      await deleteProject(id);
+      const projs = await getProjects();
+      setProjects(projs);
+      if (activeProjectId === id) {
+        if (projs.length > 0) {
+          handleProjectSelect(projs[0].id);
+        } else {
+          setActiveProjectId('');
+          localStorage.removeItem('lastProjectId');
+          setMessages([]);
+        }
+      }
+    } catch (error: any) {
+      alert(error.message);
+    }
+  };
+
+  const handleUpdateProject = async (id: string, updates: Partial<Project>) => {
+    try {
+      await updateProject(id, updates);
+      const projs = await getProjects();
+      setProjects(projs);
+    } catch (error: any) {
+      alert(error.message);
+    }
+  };
+
+  const handleReorderProjects = async (ids: string[]) => {
+    try {
+      const newProjs = await reorderProjects(ids);
+      setProjects(newProjs);
     } catch (error: any) {
       alert(error.message);
     }
@@ -217,6 +284,9 @@ function App() {
     sendTerminalInput(activeProjectId, action);
     setPendingPrompt(null);
   };
+
+  const activeProject = projects.find(p => p.id === activeProjectId);
+  const ProjectIcon = AVAILABLE_ICONS[activeProject?.icon as keyof typeof AVAILABLE_ICONS] || Bot;
 
   return (
     <div className="app-container">
@@ -230,6 +300,9 @@ function App() {
         activeProjectId={activeProjectId}
         onSelectProject={handleProjectSelect}
         onAddProject={handleAddProject}
+        onDeleteProject={handleDeleteProject}
+        onUpdateProject={handleUpdateProject}
+        onReorderProjects={handleReorderProjects}
         isOpen={isSidebarOpen}
         onClose={() => setIsSidebarOpen(false)}
         theme={theme}
@@ -243,8 +316,8 @@ function App() {
               <Menu size={24} />
             </button>
             <div className="header-title">
-              <Bot size={24} className="robot-icon" />
-              <h1>{projects.find(p => p.id === activeProjectId)?.name || 'Gemini Compagnon'}</h1>
+              <ProjectIcon size={24} className="robot-icon" />
+              <h1>{activeProject?.name || 'Gemini Compagnon'}</h1>
             </div>
           </div>
           <div className="header-right">
@@ -314,13 +387,19 @@ function App() {
 
         <footer className="input-area">
           <div className="input-container">
-            <input
-              type="text"
+            <textarea
+              ref={textareaRef}
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && handleSend()}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  handleSend();
+                }
+              }}
               placeholder="Écris ton message..."
               disabled={isLoading}
+              rows={1}
             />
             <button 
               className={`send-button ${input.trim() ? 'active' : ''}`}

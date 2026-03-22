@@ -8,5 +8,25 @@
     "role": "assistant",
     "text": "### Analyse du projet \"Diapery\"\n\nOui, je comprends très bien ton projet ! **Diapery** est une application complète (Full-stack) conçue pour comparer les prix des couches pour bébé et aider les parents à faire des économies en surveillant les tarifs sur différentes enseignes.\n\nVoici ce que j'ai identifié dans ton architecture :\n\n1.  **Backend (FastAPI & SQLModel) :**\n    *   Utilise **Playwright** pour le scraping (Amazon, Leclerc, etc.).\n    *   Gère une base de données SQLite (`diapery.db`) via **SQLModel**.\n    *   Possède une logique de \"seeding\" (`seed.py`) et de planification de tâches (`apscheduler`) pour le scraping bi-journalier.\n    *   Expose une API sur le port `8000`.\n\n2.  **Frontend (Angular 17+) :**\n    *   Une interface moderne utilisant les **Signals** d'Angular et **SCSS**.\n    *   Des services dédiés pour les couches (`diaper.service.ts`) et les notifications (`notification.service.ts`).\n    *   Accessible sur le port `4200`.\n\n3.  **Outils & Scripts :**\n    *   Un script `run.sh` à la racine pour lancer l'ensemble de l'écosystème facilement.\n    *   Une gestion des variables d'environnement via des fichiers `.env`.\n\nTon projet est bien structuré et prêt pour le développement de nouvelles fonctionnalités ou la correction de bugs. Comment souhaites-tu que je t'aide aujourd'hui ?",
     "timestamp": "2026-03-21T17:36:36.024Z"
+  },
+  {
+    "role": "user",
+    "text": "Il y a pas mal de soucis deja je ne récupère pas bien les alerte comme pour 60mimlions consomateurs",
+    "timestamp": "2026-03-22T12:31:45.251Z"
+  },
+  {
+    "role": "assistant",
+    "text": "### Résumé des actions effectuées : Amélioration de la récupération des alertes de sécurité\n\nJ'ai résolu les problèmes liés à la récupération des alertes de sécurité en effectuant les actions suivantes :\n\n1.  **Réparation du scraper `RappelConso`** : Le site officiel a migré vers un nouveau système de design (DSFR), ce qui rendait les anciens sélecteurs obsolètes. J'ai mis à jour les sélecteurs CSS, l'URL de recherche et augmenté le temps d'attente pour gérer le rendu dynamique.\n2.  **Enrichissement des mots-clés** : La recherche sur `RappelConso` couvre désormais les mots-clés \"bébé\" et \"couche\" pour garantir une meilleure couverture des produits suivis par l'utilisateur.\n3.  **Ajout de la source \"60 millions de consommateurs\"** : J'ai implémenté un nouveau scraper dédié à ce site, ciblant spécifiquement la catégorie \"Bébés - enfants - ados\".\n4.  **Synchronisation globale** : Le backend (`main.py`) a été mis à jour pour agréger et enregistrer automatiquement les alertes provenant de ces deux sources majeures, tout en évitant les doublons.\n5.  **Validation** : Le bon fonctionnement des deux scrapers a été vérifié par des scripts de test, confirmant la récupération d'alertes pertinentes (jouets, puériculture, etc.).\n\nLes alertes de sécurité sont désormais plus exhaustives et fiables, incluant les rappels de produits signalés par \"60 millions de consommateurs\".",
+    "timestamp": "2026-03-22T12:48:21.137Z"
+  },
+  {
+    "role": "user",
+    "text": "Je veux que tu modifie les couleurs cest trop rose .. on est les deux parent a l'utiliser ",
+    "timestamp": "2026-03-22T14:15:02.213Z"
+  },
+  {
+    "role": "assistant",
+    "text": "**Refonte de la palette de couleurs vers un thème moderne et neutre**\n\nJ'ai remplacé l'ensemble de la palette de couleurs roses par un thème moderne basé sur l'indigo et l'ardoise (Slate), beaucoup plus équilibré pour une utilisation partagée.\n\n**Modifications effectuées :**\n\n*   **Couleur principale (Primary) :** Passée du rose au bleu indigo (`#6366f1`), apportant un aspect plus professionnel et neutre.\n*   **Arrière-plans :** Remplacés par des tons gris-bleu très clairs (`#f8fafc`) pour le mode clair et ardoise profonde (`#0f172a`) pour le mode sombre.\n*   **Bordures et Ombres :** Ajustées pour être plus discrètes et cohérentes avec la nouvelle palette, supprimant toute trace de teinte rosée.\n*   **Mode Sombre :** Entièrement revu pour utiliser des contrastes d'indigo et d'ardoise, garantissant une lisibilité optimale tout en conservant une esthétique moderne.\n*   **Badges et Alertes :** Les couleurs d'état (succès, danger, avertissement) ont été affinées pour s'intégrer parfaitement à ce nouveau design sans paraître trop enfantines.\n\nL'application Diapery arbore désormais un look \"Parentalité moderne\" qui convient aux deux parents.",
+    "timestamp": "2026-03-22T14:15:43.941Z"
   }
 ]
