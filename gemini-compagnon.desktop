@@ -1,0 +1,12 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Gemini Compagnon
+Comment=Interface web responsive pour gemini-cli
+Exec=/home/mangoz404/Documents/Projets/Web/gemini-compagnon/start-dev.sh
+Icon=/home/mangoz404/Documents/Projets/Web/gemini-compagnon/logo.png
+Terminal=true
+Path=/home/mangoz404/Documents/Projets/Web/gemini-compagnon
+Categories=Development;Utility;
+Keywords=gemini;cli;ai;chat;
+StartupNotify=true

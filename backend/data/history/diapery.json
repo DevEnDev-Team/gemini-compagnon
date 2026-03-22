@@ -1,0 +1,12 @@
+[
+  {
+    "role": "user",
+    "text": "Hello tu comprend mon projet ?",
+    "timestamp": "2026-03-21T17:36:20.838Z"
+  },
+  {
+    "role": "assistant",
+    "text": "### Analyse du projet \"Diapery\"\n\nOui, je comprends très bien ton projet ! **Diapery** est une application complète (Full-stack) conçue pour comparer les prix des couches pour bébé et aider les parents à faire des économies en surveillant les tarifs sur différentes enseignes.\n\nVoici ce que j'ai identifié dans ton architecture :\n\n1.  **Backend (FastAPI & SQLModel) :**\n    *   Utilise **Playwright** pour le scraping (Amazon, Leclerc, etc.).\n    *   Gère une base de données SQLite (`diapery.db`) via **SQLModel**.\n    *   Possède une logique de \"seeding\" (`seed.py`) et de planification de tâches (`apscheduler`) pour le scraping bi-journalier.\n    *   Expose une API sur le port `8000`.\n\n2.  **Frontend (Angular 17+) :**\n    *   Une interface moderne utilisant les **Signals** d'Angular et **SCSS**.\n    *   Des services dédiés pour les couches (`diaper.service.ts`) et les notifications (`notification.service.ts`).\n    *   Accessible sur le port `4200`.\n\n3.  **Outils & Scripts :**\n    *   Un script `run.sh` à la racine pour lancer l'ensemble de l'écosystème facilement.\n    *   Une gestion des variables d'environnement via des fichiers `.env`.\n\nTon projet est bien structuré et prêt pour le développement de nouvelles fonctionnalités ou la correction de bugs. Comment souhaites-tu que je t'aide aujourd'hui ?",
+    "timestamp": "2026-03-21T17:36:36.024Z"
+  }
+]

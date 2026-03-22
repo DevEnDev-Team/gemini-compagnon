@@ -1,0 +1,101 @@
+:root {
+  /* Brand Colors */
+  --primary: #6366f1;
+  --primary-light: #818cf8;
+  --primary-dark: #4f46e5;
+  --accent: #aa3bff;
+  
+  /* Layout */
+  --radius: 12px;
+  --header-height: 64px;
+  --sidebar-width: 300px;
+  --sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --mono: 'Fira Code', ui-monospace, Consolas, monospace;
+
+  /* Light Theme (Default) */
+  --bg-color: #f8fafc;
+  --bg-sidebar: #ffffff;
+  --bg-chat: #f1f5f9;
+  --bg-header: #ffffff;
+  --bg-input: #ffffff;
+  --bg-input-inner: #f1f5f9;
+  --bg-secondary: #f1f5f9;
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+  --border-color: #e2e8f0;
+  --bubble-user: #6366f1;
+  --bubble-assistant: #ffffff;
+  --bubble-assistant-border: #e2e8f0;
+  --overlay-bg: rgba(15, 23, 42, 0.4);
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --success: #10b981;
+
+  /* Special */
+  --project-active-bg: #e0e7ff;
+  --project-active-text: #4f46e5;
+  --terminal-bg: #0f172a;
+  --terminal-text: #38bdf8;
+  --terminal-header: #1e293b;
+  
+  color-scheme: light dark;
+}
+
+[data-theme='dark'] {
+  --bg-color: #0f172a;
+  --bg-sidebar: #1e293b;
+  --bg-chat: #0f172a;
+  --bg-header: #1e293b;
+  --bg-input: #1e293b;
+  --bg-input-inner: #0f172a;
+  --bg-secondary: #334155;
+  --text-main: #f1f5f9;
+  --text-muted: #94a3b8;
+  --border-color: #334155;
+  --bubble-user: #4f46e5;
+  --bubble-assistant: #1e293b;
+  --bubble-assistant-border: #334155;
+  --overlay-bg: rgba(0, 0, 0, 0.6);
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+  --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.5), 0 2px 4px -2px rgb(0 0 0 / 0.5);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.6), 0 4px 6px -4px rgb(0 0 0 / 0.6);
+  --success: #10b981;
+
+  --project-active-bg: #312e81;
+  --project-active-text: #e0e7ff;
+  --terminal-bg: #020617;
+  --terminal-text: #38bdf8;
+  --terminal-header: #0f172a;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  margin: 0;
+  font-family: var(--sans);
+  background-color: var(--bg-color);
+  color: var(--text-main);
+  transition: background-color 0.3s ease, color 0.3s ease;
+  overflow: hidden;
+}
+
+#root {
+  min-height: 100svh;
+}
+
+h1, h2, h3 {
+  color: var(--text-main);
+}
+
+.text-primary {
+  color: var(--primary);
+}
+
+code {
+  font-family: var(--mono);
+}
